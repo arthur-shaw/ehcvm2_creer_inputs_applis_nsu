@@ -1,0 +1,132 @@
+---
+title: "NSU de production: entrées pour les applis CAPI "
+subtitle: "Modalités à copier-coller"
+output:
+    html_document:
+      toc: true
+      toc_float: true
+      toc_depth: 3
+---
+
+
+```{r knitr_options, include = FALSE, echo = FALSE, warning = FALSE, message = FALSE}
+
+# knitr options
+knitr::opts_chunk$set(
+	echo = FALSE,
+    results = 'asis', 
+	warning = FALSE,
+	message = FALSE,
+    comment = NA,
+	out.width = '100%')
+
+```
+
+```{r show_valid_codes}
+
+#' Afficher les codes d'unité et de tailles valides pour un produit
+#' 
+#' @param df Data frame. Correspond à la base NSU pour les produits de consommation
+#' @param code_produit Integer. Code du produit dont les unités et les tailles sont à afficher
+#' 
+#' @return Character. Texte 
+show_valid_codes <- function(
+    df = nsu_production,
+    code_produit
+) {
+
+    # ceux du produit
+    df_produit <- dplyr::filter(df, produit == code_produit)
+
+    produit_txt <- df_produit %>%
+        dplyr::mutate(produit = haven::as_factor(produit, levels = "labels")) %>%
+        dplyr::slice(1L) %>%
+        dplyr::pull(produit)
+
+    unites_txt <- df_produit %>%
+        dplyr::distinct(produit, unite) %>%
+        dplyr::mutate(unite_nom = haven::as_factor(unite, levels = "labels")) %>%
+        glue::glue_data("{unite_nom}...{unite}") %>%
+        glue::glue_collapse(sep = "<br>")
+
+    # ceux de l'ensemble des produits
+    group_txt <- df_produit %>%
+        dplyr::slice(1L) %>%
+        dplyr::pull(groupe)
+
+    df_groupe <- dplyr::filter(df, groupe == group_txt)
+
+    unites_groupe_txt <- df_groupe %>%
+        dplyr::distinct(unite) %>%
+        dplyr::mutate(unite_nom = haven::as_factor(unite, levels = "labels")) %>%
+        glue::glue_data("{unite_nom}...{unite}") %>%
+        glue::glue_collapse(sep = "<br>")        
+
+    glue::glue(
+        "
+
+        # {produit_txt}
+
+        ------------------------------------------<br>
+        Unités fixes<br>
+        ------------------------------------------<br>
+
+        {unites_txt}<br>
+
+        ------------------------------------------<br>
+        Unités autre<br>
+        ------------------------------------------<br>
+
+        {unites_groupe_txt}<br>
+
+        "
+    )
+
+
+}
+
+```
+
+# Céréales
+
+```{r cereales}
+
+cereales_nsu <- identify_products_in_df(code_groupe = codes_cereales)
+
+if (length(cereales_nsu) > 0) {
+
+    purrr::map(
+        .x = cereales_nsu,
+        .f = ~ show_valid_codes(
+            df = nsu_consommation,
+            code_produit = .x
+        )
+    )
+
+} else {
+    "Aucun produit dans ce groupe de produits"
+}
+
+```
+
+# Viande
+
+```{r viande}
+
+viande_nsu <- identify_products_in_df(code_groupe = codes_viande)
+
+if (length(viande_nsu) > 0) {
+
+    purrr::map(
+        .x = viande_nsu,
+        .f = ~ show_valid_codes(
+            df = nsu_consommation,
+            code_produit = .x
+        )
+    )
+
+} else {
+    "Aucun produit dans ce groupe de produits"
+}
+
+```
