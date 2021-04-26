@@ -22,6 +22,14 @@ knitr::opts_chunk$set(
 
 ```
 
+```{css}
+
+h1 {
+    color: blue;
+}
+
+```
+
 ```{r show_valid_codes}
 
 #' Afficher les codes d'unité et de tailles valides pour un produit
@@ -50,13 +58,19 @@ show_valid_codes <- function(
         glue::glue_collapse(sep = "<br>")
 
     # ceux de l'ensemble des produits
-    group_txt <- df_produit %>%
+    df_autre <- df %>% 
+        dplyr::group_by(produit) %>%
         dplyr::slice(1L) %>%
-        dplyr::pull(groupe)
+        dplyr::mutate(
+            unite = 99,
+            unite = haven::labelled(.data[["unite"]], labels = c(`Autres` = 99))
+        )
 
-    df_groupe <- dplyr::filter(df, groupe == group_txt)
+    df_sauf_produit <- df %>% 
+        bind_rows(df_autre) %>%
+        anti_join(df_produit, by = c("unite" = "unite"))
 
-    unites_groupe_txt <- df_groupe %>%
+    unites_groupe_txt <- df_sauf_produit %>%
         dplyr::distinct(unite) %>%
         dplyr::mutate(unite_nom = haven::as_factor(unite, levels = "labels")) %>%
         glue::glue_data("{unite_nom}...{unite}") %>%
@@ -89,44 +103,17 @@ show_valid_codes <- function(
 
 # Céréales
 
-```{r cereales}
+```{r produits_unites}
 
-cereales_nsu <- identify_products_in_df(code_groupe = codes_cereales)
+produits <- distinct(nsu_production, produit) %>%
+    pull(produit)
 
-if (length(cereales_nsu) > 0) {
-
-    purrr::map(
-        .x = cereales_nsu,
-        .f = ~ show_valid_codes(
-            df = nsu_consommation,
-            code_produit = .x
-        )
+purrr::map(
+    .x = produits,
+    .f = ~ show_valid_codes(
+        df = nsu_production,
+        code_produit = .x
     )
-
-} else {
-    "Aucun produit dans ce groupe de produits"
-}
-
-```
-
-# Viande
-
-```{r viande}
-
-viande_nsu <- identify_products_in_df(code_groupe = codes_viande)
-
-if (length(viande_nsu) > 0) {
-
-    purrr::map(
-        .x = viande_nsu,
-        .f = ~ show_valid_codes(
-            df = nsu_consommation,
-            code_produit = .x
-        )
-    )
-
-} else {
-    "Aucun produit dans ce groupe de produits"
-}
+)
 
 ```
