@@ -13,6 +13,7 @@ nom_fichier <- "Qx_NSU_UEMOA_EHCVM2.xlsx"
 nom_onglet_consommation <- "S1_Releves_Consommation"
 nom_onglet_production   <- "S2_Releves_Production"
 nom_onglet_unites       <- "Unités"
+nom_onglet_tailles      <- "Tailles"
 
 # -----------------------------------------------------------------------------
 # Codes de produit, d'unité, et de taille attendus
@@ -31,15 +32,6 @@ codes_sucreries <- c(134:138)
 codes_epices <- c(139:154)
 codes_boissons <- c(155:165)
 codes_produits <- c(codes_cereales, codes_viande, codes_poisson, codes_laitier, codes_huiles, codes_fruits, codes_legumes, codes_legumineuses, codes_sucreries, codes_epices, codes_boissons)
-codes_tailles <- c(
-    `Unité de taille unique` = 0, 
-    `Petit` = 1, 
-    `Moyen` = 2, 
-    `Grand` = 3,
-    `Quart` = 4,
-    `Demi` = 5,
-    `Entier` = 6
-)
 
 # =============================================================================
 # Charger les packages requis
@@ -137,6 +129,10 @@ assert_that(
 # Ingérer l'onglet sur les unités afin d'établir un inventaire exhaustif de codes
 # -----------------------------------------------------------------------------
 
+# -----------------------------------------------------------------------------
+# Unités
+# -----------------------------------------------------------------------------
+
 # ingérer et vérifer l'onglet sur les unités
 nsu_unites_brutes <- readxl::read_excel(
         path = paste0(entree_dir, nom_fichier) , 
@@ -168,6 +164,30 @@ nsu_unites_df <- rbind(nsu_unites_colonne1, nsu_unites_colonne2)
 nsu_unites <- setNames(
     nm = nsu_unites_df$unite_nom, 
     object = as.integer(nsu_unites_df$unite_val)
+)
+
+# -----------------------------------------------------------------------------
+# Tailles
+# -----------------------------------------------------------------------------
+
+# ingérer et vérifer l'onglet sur les unités
+nsu_tailles_df <- readxl::read_excel(
+        path = paste0(entree_dir, nom_fichier) , 
+        sheet = nom_onglet_tailles
+    ) %>%
+    # sélectionner les colonnes avec données
+    select(1, 2) %>%
+    # modifier le nom des colonnes
+    rename(
+        taille_nom = 1,
+        taille_val = 2
+    )
+
+# créer un vecteur avec des noms
+# utile à la fois pour trier les bases et appliquer les étiquettes de valeur
+nsu_tailles <- setNames(
+    nm = nsu_tailles_df$taille_nom, 
+    object = as.integer(nsu_tailles_df$taille_val)
 )
 
 # -----------------------------------------------------------------------------
@@ -220,7 +240,7 @@ nsu_consommation <- nsu_consommation_df %>%
         ), 
         produit = haven::labelled(produit, labels = nsu_produits),
         unite = haven::labelled(unite, labels = nsu_unites),
-        taille = haven::labelled(taille, labels = codes_tailles),
+        taille = haven::labelled(taille, labels = nsu_tailles),
         groupe = case_when(
             produit %in% codes_cereales ~ "cereales",
             produit %in% codes_viande ~ "viande",
@@ -263,7 +283,7 @@ agent_conso <- pointblank::create_agent(
         label = "Toutes les tailles ont un code valide",
         step = 3,
         columns = vars(taille),
-        set = codes_tailles
+        set = nsu_tailles
     ) %>%
     pointblank::interrogate()
 
