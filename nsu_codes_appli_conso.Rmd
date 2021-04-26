@@ -55,6 +55,7 @@ identify_products_in_df <- function(
 #' @return Character. Texte 
 show_valid_codes <- function(
     df = nsu_consommation,
+    df_taille = nsu_tailles_df,
     code_produit
 ) {
 
@@ -72,10 +73,8 @@ show_valid_codes <- function(
         glue::glue_data("{unite_nom}...{unite}") %>%
         glue::glue_collapse(sep = "<br>")
 
-    tailles_txt <- df_produit %>%
-        dplyr::distinct(produit, taille) %>%
-        dplyr::mutate(taille_nom = haven::as_factor(taille, levels = "labels")) %>%
-        glue::glue_data("{taille_nom}...{taille}") %>%
+    tailles_txt <- nsu_tailles_df  %>%
+        glue::glue_data("{taille_nom}...{taille_val}") %>%
         glue::glue_collapse(sep = "<br>")
 
     # ceux du groupe
@@ -91,11 +90,7 @@ show_valid_codes <- function(
         glue::glue_data("{unite_nom}...{unite}") %>%
         glue::glue_collapse(sep = "<br>")        
 
-    tailles_groupe_txt <- df_groupe %>%
-        dplyr::distinct(taille) %>%
-        dplyr::mutate(taille_nom = haven::as_factor(taille, levels = "labels")) %>%
-        glue::glue_data("{taille_nom}...{taille}") %>%
-        glue::glue_collapse(sep = "<br>")   
+    tailles_groupe_txt <- tailles_txt   
 
 # unites_txt <- glue::glue_data(unites,"{unite_nom}...{unite}") %>% glue::glue_collapse(sep = "\n")
 
