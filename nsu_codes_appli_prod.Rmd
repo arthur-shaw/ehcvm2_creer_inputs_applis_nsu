@@ -101,8 +101,6 @@ show_valid_codes <- function(
 
 ```
 
-# Céréales
-
 ```{r produits_unites}
 
 produits <- distinct(nsu_production, produit) %>%
