@@ -96,7 +96,17 @@ show_valid_codes <- function(
 
     df_groupe <- dplyr::filter(df, groupe == group_txt)
 
-    df_sauf_produit <- anti_join(df_groupe, df_produit, by = c("produit" = "produit", "unite" = "unite"))
+    df_autre <- df_groupe %>% 
+        dplyr::group_by(produit) %>%
+        dplyr::slice(1L) %>%
+        dplyr::mutate(
+            unite = 99,
+            unite = haven::labelled(.data[["unite"]], labels = c(`Autres` = 99))
+        )
+
+    df_sauf_produit <- df_groupe %>% 
+        bind_rows(df_autre) %>%
+        anti_join(df_produit, by = c("unite" = "unite"))
 
     unites_groupe_txt <- df_sauf_produit %>%
         dplyr::distinct(unite) %>%
