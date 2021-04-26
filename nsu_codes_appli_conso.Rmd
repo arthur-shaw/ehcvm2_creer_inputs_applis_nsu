@@ -21,6 +21,18 @@ knitr::opts_chunk$set(
 
 ```
 
+```{css}
+
+h1 {
+    color: red;
+}
+
+h2 {
+    color: blue;
+}
+
+```
+
 ```{r find_products_in_df}
 
 #' Faire resortir le code des produits dans du groupe dans la base
