@@ -124,7 +124,7 @@ nsu_production_df <- readxl::read_excel(
         sheet = nom_onglet_production
     ) %>%
     # retenir les lignes avec des données
-    filter(row_number() >= -) %>%
+    filter(row_number() >= 6) %>%
     # renommer les colonnes pertinentes
     rename(
         nom_produit = 1,
@@ -241,12 +241,6 @@ if(pointblank::all_passed(agent = agent_conso) == FALSE) {
     }
 
 }
-
-# =============================================================================
-# Sauvegarder les bases sous format tab
-# =============================================================================
-
-readr::write_tsv(nsu_production, file = paste0(sortie_dir, "nsu_production.tab"))
 
 # =============================================================================
 # Créer un document HTML qui capte les unités et tailles pour chaque produit
