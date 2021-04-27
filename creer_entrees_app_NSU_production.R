@@ -308,14 +308,14 @@ if(pointblank::all_passed(agent = agent_conso) == FALSE) {
 # ingérer la base du fichier Excel
 tableau_df <- readxl::read_excel(paste0(entree_dir, nom_tableau)) %>%
     # retenir les colonnes requises, listées ci-haut
-    select(all_of(cols_necessaires)) %>%
+    dplyr::select(dplyr::all_of(cols_necessaires)) %>%
     # retenir les lignes avec un contenu entièrement non-vide
-    filter(if_all(
+    dplyr::filter(dplyr::if_all(
         .cols = everything(),
         .fns = ~ !is.na(.x)
     )) %>%
     # renommer les colonnes: laisser tomber le suffixe
-    rename_with(
+    dplyr::rename_with(
         .cols = everything(),
         .fn = ~ stringr::str_replace(.x, "_code", "")
     ) %>%
