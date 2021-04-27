@@ -114,7 +114,7 @@ assert_that(
 # Tableau culture-unité-état
 # -----------------------------------------------------------------------------
 
-# `nom_fichier` existe dans `proj_dir`
+# `nom_tableau` existe dans `proj_dir`
 assertthat::assert_that(
     file.exists(paste0(entree_dir, nom_tableau)),
     msg = glue::glue(
@@ -125,14 +125,24 @@ assertthat::assert_that(
     )
 )
 
-# fichier `nom_fichier` n'est pas un fichier Excel
+# fichier `nom_tableau` n'est pas un fichier Excel
 assertthat::assert_that(
     readxl::excel_format(path = paste0(entree_dir, nom_tableau)) %in% c("xlsx", "xls"),
     msg = glue::glue(
-        "Le fichier désigné comme questionnaire n'est pas un fichier Excel",
+        "Le fichier désigné comme tableau des cultures-unités-états n'est pas un fichier Excel",
         "Veuillez saisir un fichier Excel dans `nom_tableau`",
         .sep = "\n"
     )
+)
+
+cols_necessaires <- c("culture_code", "unite_code", "etat_code")
+cols_retrouves <- names(readxl::read_excel(paste0(entree_dir, nom_tableau)))
+assert_that(
+    all(cols_necessaires %in% cols_retrouves), 
+    msg = glue::glue("\\
+        Le fichier {nom_tableau} ne contient pas les onglets nécessaires
+        Onglets attendus: {paste(cols_necessaires, collapse = ', ')}
+        Onglets retrouvés: {paste(cols_retrouves, collapse = ', ')}")
 )
 
 # =============================================================================
