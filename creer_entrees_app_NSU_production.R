@@ -318,7 +318,9 @@ tableau_df <- readxl::read_excel(paste0(entree_dir, nom_tableau)) %>%
     rename_with(
         .cols = everything(),
         .fn = ~ stringr::str_replace(.x, "_code", "")
-    )
+    ) %>%
+    # ajouter une colonne nécessaire pour SuSo
+    dplyr::mutate(rowcode = dplyr::row_number())
 
 # créer un agent de vérification et intéroger la base
 agent_tableau <- pointblank::create_agent(
