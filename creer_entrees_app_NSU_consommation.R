@@ -147,6 +147,8 @@ nsu_unites_colonne1 <- select(nsu_unites_brutes, 1, 2) %>%
         unite_nom = 1,
         unite_val = 2
     )
+    ) %>%
+    dplyr::filter(!is.na(unite_nom) & !is.na(unite_val))
 
 # prendre les unités dans les 2 dernières colonnes
 nsu_unites_colonne2 <- select(nsu_unites_brutes, 4, 5) %>%
@@ -154,7 +156,7 @@ nsu_unites_colonne2 <- select(nsu_unites_brutes, 4, 5) %>%
         unite_nom = 1,
         unite_val = 2
     ) %>%
-    filter(!is.na(unite_val))
+    dplyr::filter(!is.na(unite_nom) & !is.na(unite_val))
 
 # mettre ensemble
 nsu_unites_df <- rbind(nsu_unites_colonne1, nsu_unites_colonne2)
